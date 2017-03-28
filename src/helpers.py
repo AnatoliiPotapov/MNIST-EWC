@@ -2,10 +2,23 @@ import os
 import sys
 from urllib import urlretrieve
 import numpy as np
+import matplotlib.pyplot as plt
 
+def plot(X):
+    """ Plot 4 images as gray scale. """
+    plt.subplot(221)
+    plt.imshow(X[0].reshape(28,28), cmap=plt.get_cmap('gray'))
+    plt.subplot(222)
+    plt.imshow(X[1].reshape(28,28), cmap=plt.get_cmap('gray'))
+    plt.subplot(223)
+    plt.imshow(X[2].reshape(28,28), cmap=plt.get_cmap('gray'))
+    plt.subplot(224)
+    plt.imshow(X[3].reshape(28,28), cmap=plt.get_cmap('gray'))
+    # show the plot
+    plt.show()
 
 def maybe_download(url, data_root, filename, expected_bytes, force=False):
-    """Download a file if not present, and make sure it's the right size."""
+    """ Download a file if not present, and make sure it's the right size."""
     dest_filename = os.path.join(data_root, filename)
     if force or not os.path.exists(dest_filename):
         print('Attempting to download:', filename) 
@@ -20,17 +33,14 @@ def maybe_download(url, data_root, filename, expected_bytes, force=False):
             'Failed to verify ' + dest_filename + '. Can you get to it with a browser?')
     return dest_filename
 
-
 def one_hot(dataset, labels, num_labels = 10):
     """ Transform X, y to X, y* where y* is one_hot encoded vector."""
     labels = (np.arange(num_labels) == labels[:,None]).astype(np.float32)
     return dataset, labels
 
-
 from ipywidgets import IntProgress
 from IPython.display import display
 import time
-
 
 class Progress(object):
     """ Renders progress bar with time remaining in minutes and seconds."""
@@ -57,7 +67,6 @@ n_perm = 250
 from itertools import product
 import random
 
-
 def old_permutation(X, n):
     """ Old version of image permutations. """
     from_ind = [np.random.randint(low=0, high=784, size=n_perm) for i in range(var)]
@@ -73,7 +82,6 @@ def old_permutation(X, n):
             Xn[:,b[i]] = tmp 
         output.append(Xn)
     return output
-
 
 def permutation(X, n):
     """ New version of image permutations. """
