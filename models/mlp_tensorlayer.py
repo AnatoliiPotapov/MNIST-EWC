@@ -5,7 +5,7 @@ import tensorlayer as tl
 class Model:
     """ This is fully-connected net with several hidden layers. """
     
-    def __init__(self, neurons, losses, activatrion = 'relu', optimizer = 'Adam'):
+    def __init__(self, neurons, losses, activation = 'relu', optimizer = 'Adam', biases = False):
         
         tl.layers.set_name_reuse(True)
         self.graph = tf.Graph()
@@ -22,10 +22,21 @@ class Model:
             f = {}
             w = {}
             
+            if biases == False:
+                bias_init = None
+            if biases == True:
+                bias_init = tf.constant_initializer(value=0.0)
+                
+            if activation == 'relu':
+                activation = tf.nn.relu
+            if activation == 'sigmoid':
+                activation = tf.nn.sigmoid
+  
+             
             # define hidden layers
             for index, h_units in enumerate(neurons[1:-1]):
                 self.network = tl.layers.DenseLayer(self.network, n_units=h_units,
-                                    act=tf.nn.relu, b_init=None, name='relu{0}'.format(index+1))
+                                    act=activation, b_init=None, name='relu{0}'.format(index+1))
                 
                 # define w* and fisher coefs
                 w['relu{0}'.format(index+1)] = tf.Variable(tf.random_normal([neurons[index], h_units]))
@@ -66,7 +77,11 @@ class Model:
 
             # define the optimizer
             train_params = self.network.all_params
-            self.optimizer = tf.train.AdamOptimizer(0.001)
+            
+            if optimizer == 'Adam':
+                self.optimizer = tf.train.AdamOptimizer(0.001)
+            if optimizer == 'SGD':
+                self.optimizer = tf.train.GradientDescentOptimizer(losses['lr'])
             
             self.train_op = self.optimizer.minimize(self.cost, var_list=train_params)
             self.train_op_ewc = self.optimizer.minimize(self.ewc_cost, var_list=train_params)

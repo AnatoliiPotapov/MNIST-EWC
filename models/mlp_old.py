@@ -70,7 +70,7 @@ class Model:
         if optimizer == 'Adam':
             self.optimizer = tf.train.AdamOptimizer(0.001)
         if optimizer == 'SGD':
-            self.optimizer = tf.train.GradientDescentOptimizer(0.001)
+            self.optimizer = tf.train.GradientDescentOptimizer(0.1)
         
         self.minimize_cost = self.optimizer.minimize(self.cost) 
         
