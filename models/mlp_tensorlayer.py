@@ -74,11 +74,12 @@ class Model:
             # define cost function and metric
             if mask == False:
                 self.cost = tl.cost.cross_entropy(y, self.y_, 'cost')
+                correct_prediction = tf.equal(tf.argmax(y, 1), self.y_)
             if mask == True:
                 yn = tf.multiply(y,self.s)
                 self.cost = tl.cost.cross_entropy(yn, self.y_, 'cost')
+                correct_prediction = tf.equal(tf.argmax(tf.multiply(y, self.s), 1), self.y_)
                 
-            correct_prediction = tf.equal(tf.argmax(tf.multiply(y, self.s), 1), self.y_)
             self.acc = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
             self.y_op = tf.argmax(tf.nn.softmax(y), 1)
             

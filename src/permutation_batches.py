@@ -34,6 +34,13 @@ def permutation(X, n, n_perm = 250):
         output.append(Xn)
     return output
 
+def random_permutation(X, n, n_perm = 250):
+    """ New version of image permutations. """
+    Xn = np.copy(X)
+    for i in range(X.shape[0]):
+        np.random.shuffle(Xn[i,:])
+    return [Xn]
+
 def batch_generator(X, y, batch_size):
     """ Yields new batch with .next() """
     l = X.shape[0]
@@ -46,17 +53,23 @@ def batch_generator(X, y, batch_size):
             
     while True:
         yield another()
-    
+        
+def reformat(dataset, labels):
+    labels = (np.arange(10) == labels[:,None]).astype(np.float32)
+    return dataset, labels
+        
 class Permutation_batches(object):
     """ Loads data and initializes batch generators. """
     
-    def __init__(self, batch_size, n, n_perm=250, version='new'):
+    def __init__(self, batch_size, n, n_perm=250, version='new', one_hot=False):
         
         if version=='new':
             self.permutation = permutation
         if version=='old':
             self.permutation = old_permutation
-        
+        if version=='inv':
+            self.permutation = random_permutation
+
         self.n = n
         self.n_perm = n_perm
         self.batch_size = batch_size
@@ -64,12 +77,17 @@ class Permutation_batches(object):
         with gzip.open('../data/mnist.pkl.gz', 'rb') as f:
             (X_train, y_train), (X_val, y_val), (X_test, y_test) =  pickle.load(f)
         
-        self.train = (X_train, y_train)
-        self.val = (X_val, y_val)
-        self.test = (X_test, y_test)
+        if one_hot==True:
+            self.train = reformat(X_train, y_train)
+            self.val = reformat(X_val, y_val)
+            self.test = reformat(X_test, y_test)
+        else:    
+            self.train = (X_train, y_train)
+            self.val = (X_val, y_val)
+            self.test = (X_test, y_test)
         
         self.permutations = self.permutation(X_train, n, n_perm)
-        self.batches = [batch_generator(X, y_train, batch_size=batch_size) for X in self.permutations]
+        self.batches = [batch_generator(X, self.train[1], batch_size=batch_size) for X in self.permutations]
        
         
 
